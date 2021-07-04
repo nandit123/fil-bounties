@@ -1,0 +1,129 @@
+<html>
+    <head>
+        <link rel="shortcut icon" href="#">
+        <!-- <script src="https://cdn.socket.io/4.1.1/socket.io.min.js" integrity="sha384-cdrFIqe3RasCMNE0jeFG9xJHog/tgOVC1E9Lzve8LQN1g5WUHo0Kvk1mawWjxX7a" crossorigin="anonymous"></script> -->
+        <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="application/javascript"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <!-- <script src='node_modules/web3/dist/web3.min.js'></script> -->
+        <!-- <script src="https://unpkg.com/socket.io-client@2.4.1/dist/socket.io.min.js"></script> -->
+        <!-- <script src="./node_modules/socket.io-client/dist/socket.io.min.js"></script> -->
+        <script src="./node_modules/socket.io-client/dist/socket.io.js"></script>
+        <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+        <script src="./index.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io-client/4.0.1/socket.io.min.js"></script> -->
+        <style>
+            /* Style tab links */
+            .tablink {
+            background-color: #555;
+            color: white;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            font-size: 17px;
+            width: 25%;
+            }
+
+            .tablink:hover {
+            background-color: #777;
+            }
+
+            /* Style the tab content (and add height:100% for full page content) */
+            .tabcontent {
+            color: black;
+            display: none;
+            padding: 100px 20px;
+            height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="color: white; background-color: black; padding: 15px;">
+            <div class="row">
+                <div class="col align-self-center">
+                    <h1><b>FIL BOUNTY</b></h1>
+                </div>
+                <div class="col col-lg-2 align-self-center">
+                    <button class="btn btn-primary" onclick="load()">Connect to metamask (rinkeby)</button>
+                </div>
+            </div>
+        </div>
+        <button class="tablink" onclick="openPage('Home', this)">Make a Bounty</button>
+        <button class="tablink" onclick="openPage('News', this)">Submit Bounty</button>
+        <button class="tablink" onclick="openPage('Contact', this); getNumberOfBounties();"id="defaultOpen">See all Bounties</button>
+        <button class="tablink" onclick="openPage('About', this)">About</button>
+
+        <div id="Home" class="tabcontent center-block">
+            <form style="width: 50%;">
+                <div class="form-group">
+                <label for="exampleInputEmail1">Title</label>
+                <input type="text" class="form-control" id="titleInput" placeholder="Enter Bounty Title">
+                </div>
+                <div class="form-group">
+                <label for="exampleInputPassword1">Description</label>
+                <input type="text" class="form-control" id="descriptionInput" placeholder="Enter Bounty Description">
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1">Bounty Amount</label>
+                    <input type="text" class="form-control" id="amountInput" placeholder="Enter Bounty Amount in ETH">
+                </div>
+                <!-- <div class="form-group">
+                    <label for="exampleInputPassword1">Time to Complete</label>
+                    <input type="text" class="form-control" id="configInput" placeholder="Enter Time">
+                </div> -->
+                <div class="form-group form-check">
+                </div>
+            </form>
+            <button class="btn btn-secondary" onclick="useDefaultConfig()">Use Default Config</button>
+            <button class="btn btn-dark" onclick="callContract()" class="btn btn-primary">Submit</button>
+            <br>
+            <div style="margin-top: 20px;">
+                <p id="tHash"></p>
+            </div>
+          </div>
+          
+          <div id="News" class="tabcontent">
+            <div id="UploadBox">
+                <input type="file" multiple id="FileBox" class="Button" />
+                <br>
+                <p id="NameBox"></p>                
+                <button type="button" id="UploadButton" class="Button">Upload</button>
+                <span id='UploadArea'></span>
+            </div>
+            <div id="FileCid"></div>
+            <div id="FolderCid"></div>
+          </div>
+          
+          <div id="Contact" class="tabcontent">
+                <!-- <div id="TotalBounties"></div> -->
+                <div id="bounties"></div>
+                <table class="table table-hover">
+                    <thead class="thead-dark">
+                      <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Paid To Winner</th>
+                        <th scope="col">Creator</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Winner</th>
+                        <th scope="col">Deal ID</th>
+                        <th scope="col">IPFS Hash</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                  </table>
+            </div>
+          
+          <div id="About" class="tabcontent">
+            <h3>About</h3>
+            <p>Who we are and what we do.</p>
+          </div>
+    </body>
+</html>
