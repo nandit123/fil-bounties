@@ -35,6 +35,8 @@ var path;
 function FileChosen(event) {
   document.getElementById("FileCid").innerHTML = "";
   document.getElementById("FolderCid").innerHTML = "";
+  document.getElementById("individualFiles").innerHTML = "";
+
   console.log('all files:', event.target.files);
   path = Date.now().toString();
   SelectedFile = event.target.files[0];
@@ -46,8 +48,8 @@ function FileChosen(event) {
   filesProcessed = 0;
 }
 
-const socket = new io("http://13.126.82.18:3002"); // hosted
-// const socket = new io("http://127.0.0.1:3002"); // local
+// const socket = new io("http://13.126.82.18:3002"); // hosted
+const socket = new io("http://localhost:3002"); // local
 var FReader;
 var Name;
 function StartUpload () {
@@ -92,6 +94,7 @@ socket.on('MoreData', function (data){
 });
 
 socket.on('FileDownloaded', function (data) {
+  document.getElementById("individualFiles").innerHTML = '<u>Individual Files</u>';
   console.log('file download completed');
   console.log('filesProcessed=', filesProcessed);
   console.log('totalFiles=', totalFiles);
@@ -131,6 +134,24 @@ function UpdateBar(percent){
 }
 
 let contractAbi = ([
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "cid",
+				"type": "string"
+			}
+		],
+		"name": "addEntry",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
 	{
 		"inputs": [
 			{
@@ -253,6 +274,40 @@ let contractAbi = ([
 				"internalType": "string",
 				"name": "dealID",
 				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalEntries",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "entries",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "cid",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -303,7 +358,7 @@ function callContract() {
     let title = document.getElementById("titleInput").value;
     let description = document.getElementById("descriptionInput").value;
     let amount = document.getElementById("amountInput").value;
-    let contract = new ethers.Contract("0xA932450E5463E13557204a18Ee2275cCa60DdaBD", contractAbi, provider);
+    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     let overrides = {
         valgetNumberOfBountiesue: ethers.utils.parseEther(amount)     // ether in this case MUST be a string
@@ -314,16 +369,33 @@ function callContract() {
     })
 }
 
+function submitBounty() {
+    document.getElementById("tHash2").innerHTML = "";
+    // window.web3 = new Web3("https://rinkeby.infura.io/v3/3d635004c08743daae3a5cb579559dbd");
+    console.log("eth address:", ethaddress);
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    let id = document.getElementById("bountyInput").value;
+    let cid = document.getElementById("cidInput").value;
+    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+    let contractWithSigner = contract.connect(signer);
+    // change below
+    contractWithSigner.addEntry(id, cid).then(async(res) => {
+        document.getElementById("tHash2").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
+        console.log(res.hash);
+    })
+}
+
 async function getNumberOfBounties () {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    let contract = new ethers.Contract("0xA932450E5463E13557204a18Ee2275cCa60DdaBD", contractAbi, provider);
+    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     let n = await contractWithSigner.id();
     // document.getElementById('TotalBounties').innerHTML = '<b>Total Bounties: </b>' + n;
     document.getElementById('bounties').innerHTML = '<h2>Bounties</h2><br>';
     document.getElementById('tableBody').innerHTML = '';
-    for (var i = 0; i < n; i ++) {
+    for (var i = n-1; i >= 0; i --) {
         let bounty = await contractWithSigner.bounties(i);
         console.log(typeof bounty.winner)
         let winner = bounty.winner;
@@ -367,8 +439,8 @@ function getStorageInfo() {
     let cid = document.getElementById("cidInput2").value;
     console.log('cid2:', cid);
     
-    const socket = new io("http://13.126.82.18:3002"); // hosted
-    // const socket = new io("http://127.0.0.1:3002"); // local
+    // const socket = new io("http://13.126.82.18:3002"); // hosted
+    const socket = new io("http://localhost:3002"); // local
     // handle the event sent with socket.send()
     socket.on("message", data => {
         console.log(data);

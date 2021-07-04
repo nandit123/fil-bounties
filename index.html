@@ -53,8 +53,8 @@
             </div>
         </div>
         <button class="tablink" onclick="openPage('Home', this)">Make a Bounty</button>
-        <button class="tablink" onclick="openPage('News', this)">Submit Bounty</button>
-        <button class="tablink" onclick="openPage('Contact', this); getNumberOfBounties();"id="defaultOpen">See all Bounties</button>
+        <button class="tablink" onclick="openPage('News', this)" id="defaultOpen">Submit Bounty</button>
+        <button class="tablink" onclick="openPage('Contact', this); getNumberOfBounties();">See all Bounties</button>
         <button class="tablink" onclick="openPage('About', this)">About</button>
 
         <div id="Home" class="tabcontent center-block">
@@ -87,15 +87,37 @@
           </div>
           
           <div id="News" class="tabcontent">
+            <form style="width: 50%;">
+                <div class="form-group">
+                <label for="exampleInputEmail1">Bounty ID</label>
+                <input type="text" class="form-control" id="bountyInput" placeholder="Enter Bounty ID">
+                </div>
+                <div class="form-group">
+                <label for="exampleInputPassword1">CID</label>
+                <input type="text" class="form-control" id="cidInput" placeholder="Enter File CID">
+                </div>
+                <div class="form-group form-check">
+                </div>
+            </form>
+            <button class="btn btn-dark" onclick="submitBounty()">Submit</button>
+            <div style="margin-top: 20px;">
+                <p id="tHash2"></p>
+            </div>
+            <br>
+            <hr>
+            <br>
+            <h3>Get CID</h3>
             <div id="UploadBox">
-                <input type="file" multiple id="FileBox" class="Button" />
+                <input class="btn btn-secondary" type="file" multiple id="FileBox" class="Button" />
                 <br>
                 <p id="NameBox"></p>                
-                <button type="button" id="UploadButton" class="Button">Upload</button>
+                <button class="btn btn-dark" type="button" id="UploadButton" class="Button">Upload</button>
                 <span id='UploadArea'></span>
             </div>
+
+            <h3><div id="FolderCid" style="margin-top: 25px;"></div></h3>
+            <div id="individualFiles"></div>
             <div id="FileCid"></div>
-            <div id="FolderCid"></div>
           </div>
           
           <div id="Contact" class="tabcontent">
