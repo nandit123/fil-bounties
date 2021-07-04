@@ -37,14 +37,11 @@ function FileChosen(event) {
   document.getElementById("FolderCid").innerHTML = "";
   document.getElementById("individualFiles").innerHTML = "";
 
-  console.log('all files:', event.target.files);
   path = Date.now().toString();
   SelectedFile = event.target.files[0];
   totalFiles = event.target.files.length;
   Files = event.target.files;
-  console.log('selectedFile:', SelectedFile);
   document.getElementById('NameBox').value = SelectedFile.name;
-  console.log('inside File Chosen', SelectedFile.name);
   filesProcessed = 0;
 }
 
@@ -55,27 +52,18 @@ var Name;
 function StartUpload () {
   if (document.getElementById('FileBox').value != "") {
     try {
-      console.log('total files selected:', totalFiles);
       FReader = new FileReader();
       SelectedFile = Files[filesProcessed];
-      console.log('selected file:', SelectedFile);
       Name = SelectedFile.name;
       var Content = "<span id='NameArea'>Uploading " + SelectedFile.name + " as " + Name + "</span>";
       Content += '<div id="ProgreNamessContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
       Content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(SelectedFile.size / 1048576) + "MB</span>";
       document.getElementById('UploadArea').innerHTML = Content;
-      console.log('tony1');
       FReader.onload = function(event){
-        console.log('tony2');
           socket.emit('Upload', { 'Name' : Name, Data : event.target.result, 'Path': path });
-          console.log('tony3');
-          console.log('filesProcessed:', filesProcessed);
       }
-      console.log('tony4');
       socket.emit('Start', { 'Name' : Name, 'Size' : SelectedFile.size, 'Path': path });
-      console.log('tony5');
     } catch (error) {
-      console.log('error:', error);
     }
   } else {
       alert("Please Select A File");
@@ -95,9 +83,6 @@ socket.on('MoreData', function (data){
 
 socket.on('FileDownloaded', function (data) {
   document.getElementById("individualFiles").innerHTML = '<u>Individual Files</u>';
-  console.log('file download completed');
-  console.log('filesProcessed=', filesProcessed);
-  console.log('totalFiles=', totalFiles);
   
   if (filesProcessed < totalFiles) {
     SelectedFile = Files[filesProcessed];
@@ -106,7 +91,6 @@ socket.on('FileDownloaded', function (data) {
     StartUpload();
     if (filesProcessed == totalFiles) {
       // emit here for get info
-      console.log('now to get cid for folder:', path);
       socket.emit('GetCid', path)
       document.getElementById("UploadArea").innerHTML = '';
     }
@@ -115,7 +99,6 @@ socket.on('FileDownloaded', function (data) {
 
 socket.on('FileCid', function (data) {
   document.getElementById("FileCid").innerHTML += data.name + "<b> CID: " + data.cid + "</b> Size: " + data.size + "<br>"
-  console.log('inside filecid:', filesProcessed, ',', totalFiles);
   if (filesProcessed == totalFiles) {
     document.getElementById("UploadArea").innerHTML = '';
   }
@@ -129,7 +112,6 @@ function UpdateBar(percent){
   document.getElementById('ProgressBar').style.width = percent + '%';
   document.getElementById('percent').innerHTML = (Math.round(percent*100)/100) + '%';
   var MBDone = Math.round(((percent/100.0) * SelectedFile.size) / 1048576);
-  console.log('MBDone:', MBDone, ' & percent:', percent);
   document.getElementById('MB').innerHTML = MBDone;
 }
 
@@ -365,7 +347,6 @@ function callContract() {
     }
     contractWithSigner.createBounty(title, description, overrides).then(async(res) => {
         document.getElementById("tHash").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
-        console.log(res.hash);
     })
 }
 
@@ -382,13 +363,11 @@ function submitBounty() {
     // change below
     contractWithSigner.addEntry(id, cid).then(async(res) => {
         document.getElementById("tHash2").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
-        console.log(res.hash);
     })
 }
 
 async function rowClicked(id) {
   document.getElementById("txHashWinner").innerHTML = '';
-  console.log('row clicked:', id);
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   const signer = provider.getSigner()
   let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
@@ -396,7 +375,6 @@ async function rowClicked(id) {
   let bounty = await contractWithSigner.bounties(id);
   let n = parseInt(bounty.totalEntries);
   // n = parseInt(n);
-  console.log('n is: ', n, 'typeof', typeof n);
   document.getElementById("modal-body").innerHTML = '';
   document.getElementById("modal-title").innerHTML = 'Bounty <span id="bountyId">' + id + '</span> : ' + bounty.title;
   if (n == 0) {
@@ -404,9 +382,6 @@ async function rowClicked(id) {
   }
   for (var i = 0; i < n; i++) {
     let entry = await contractWithSigner.entries(id, i)
-    console.log('entry ' + i + '. ' + entry);
-    console.log('address:', entry.sender)
-    console.log('cid: ', entry.cid)
     document.getElementById("modal-body").innerHTML += '<p><b>Sender:</b> ' + entry.sender + ' and <b>CID:</b> <span id="' + entry.sender + '">' +  entry.cid + '</span></p><br>';
   }
 
@@ -417,7 +392,6 @@ async function makeWinner () {
   let winnerAddress = document.getElementById("bountyWinnerInput").value;
   let cid = document.getElementById(winnerAddress.toString()).innerHTML;
   let id = document.getElementById("bountyId").innerHTML;
-  console.log('winnerAddress:', winnerAddress, ' and cid:', cid);
   await getStorageInfo(winnerAddress, id, cid);
 }
 
@@ -432,16 +406,13 @@ async function getNumberOfBounties () {
     document.getElementById('tableBody').innerHTML = '';
     for (var i = n-1; i >= 0; i --) {
         let bounty = await contractWithSigner.bounties(i);
-        console.log(typeof bounty.winner)
         let winner = bounty.winner;
         let status = bounty.status;
         let paid = bounty.paid;
-        console.log('bounty:', bounty)
         let trClass;
         if (bounty.winner == "0x0000000000000000000000000000000000000000") {
             winner = "NIL"
         }
-        console.log('status type', typeof bounty.status)
         if (status == true) {
             status = "LIVE"
             trClass = "table-success";
@@ -471,10 +442,6 @@ async function getNumberOfBounties () {
 }
 
 async function getStorageInfo(winnerAddress, id, cid) {
-    // document.getElementById("storageInfo").innerHTML = "";
-    // let cid = document.getElementById("cidInput2").value;
-    console.log('cid2:', cid);
-    
     // const socket = new io("http://13.126.82.18:3002"); // hosted
     const socket = new io("http://localhost:3002"); // local
     // handle the event sent with socket.send()
@@ -483,19 +450,15 @@ async function getStorageInfo(winnerAddress, id, cid) {
     });
   
     socket.on("connect", () => {
-        console.log('connection made cid:', cid);
         socket.emit("cid", cid);
     });
 
     socket.on("storageInfo", async (storageInfo) => {
-        console.log('storageInfo for cid:', storageInfo);
         if (storageInfo.storageInfo) {
             // document.getElementById("storageInfo").innerHTML = storageInfo.storageInfo;
             document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
         } else {
-            console.log('type of storageInfo:', typeof storageInfo);
             let parsedInfo = jQuery.parseJSON(storageInfo);
-            console.log('parsedInfo:', parsedInfo)
             if (!parsedInfo.cidInfo.currentStorageInfo) {
               document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
               return;
@@ -506,12 +469,9 @@ async function getStorageInfo(winnerAddress, id, cid) {
               const signer = provider.getSigner()
               let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
               let contractWithSigner = contract.connect(signer);
-              console.log('dealId:', dealId.toString());
               dealId = dealId.toString();
-              console.log('type of dealID:', dealId, ' is ', typeof dealId);
               contractWithSigner.makeWinner(winnerAddress, id, cid, dealId).then(async(res) => {
                 document.getElementById("txHashWinner").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
-                console.log(res.hash);
               })
             } else {
               document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
