@@ -53,8 +53,8 @@
             </div>
         </div>
         <button class="tablink" onclick="openPage('Home', this)">Make a Bounty</button>
-        <button class="tablink" onclick="openPage('News', this)" id="defaultOpen">Submit Bounty</button>
-        <button class="tablink" onclick="openPage('Contact', this); getNumberOfBounties();">See all Bounties</button>
+        <button class="tablink" onclick="openPage('News', this)">Submit Bounty</button>
+        <button class="tablink" onclick="openPage('Contact', this); getNumberOfBounties();" id="defaultOpen">See all Bounties</button>
         <button class="tablink" onclick="openPage('About', this)">About</button>
 
         <div id="Home" class="tabcontent center-block">
@@ -78,7 +78,6 @@
                 <div class="form-group form-check">
                 </div>
             </form>
-            <button class="btn btn-secondary" onclick="useDefaultConfig()">Use Default Config</button>
             <button class="btn btn-dark" onclick="callContract()" class="btn btn-primary">Submit</button>
             <br>
             <div style="margin-top: 20px;">
@@ -134,13 +133,34 @@
                         <th scope="col">Creator</th>
                         <th scope="col">Status</th>
                         <th scope="col">Winner</th>
-                        <th scope="col">Deal ID</th>
                         <th scope="col">IPFS Hash</th>
+                        <th scope="col">Deal ID</th>
                       </tr>
                     </thead>
                     <tbody id="tableBody">
                     </tbody>
-                  </table>
+                </table>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 id="modal-title" id="exampleModalLongTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div id="modal-body" style="padding: 20px;">
+                        
+                        </div>
+                        <div class="modal-footer">
+                            <input type="text" class="form-control" id="bountyWinnerInput" placeholder="Enter Winner's Address">
+                            <button type="button" class="btn btn-primary" onclick="makeWinner()">Submit</button>
+                        </div>
+                        <div id="txHashWinner" style="padding: 20px;"></div>
+                    </div>
+                    </div>
+                </div>
             </div>
           
           <div id="About" class="tabcontent">

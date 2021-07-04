@@ -361,7 +361,7 @@ function callContract() {
     let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     let overrides = {
-        valgetNumberOfBountiesue: ethers.utils.parseEther(amount)     // ether in this case MUST be a string
+        value: ethers.utils.parseEther(amount)     // ether in this case MUST be a string
     }
     contractWithSigner.createBounty(title, description, overrides).then(async(res) => {
         document.getElementById("tHash").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
@@ -386,6 +386,41 @@ function submitBounty() {
     })
 }
 
+async function rowClicked(id) {
+  document.getElementById("txHashWinner").innerHTML = '';
+  console.log('row clicked:', id);
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const signer = provider.getSigner()
+  let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+  let contractWithSigner = contract.connect(signer);
+  let bounty = await contractWithSigner.bounties(id);
+  let n = parseInt(bounty.totalEntries);
+  // n = parseInt(n);
+  console.log('n is: ', n, 'typeof', typeof n);
+  document.getElementById("modal-body").innerHTML = '';
+  document.getElementById("modal-title").innerHTML = 'Bounty <span id="bountyId">' + id + '</span> : ' + bounty.title;
+  if (n == 0) {
+    document.getElementById("modal-body").innerHTML = 'No Entries Yet, Check Back Later !';  
+  }
+  for (var i = 0; i < n; i++) {
+    let entry = await contractWithSigner.entries(id, i)
+    console.log('entry ' + i + '. ' + entry);
+    console.log('address:', entry.sender)
+    console.log('cid: ', entry.cid)
+    document.getElementById("modal-body").innerHTML += '<p><b>Sender:</b> ' + entry.sender + ' and <b>CID:</b> <span id="' + entry.sender + '">' +  entry.cid + '</span></p><br>';
+  }
+
+}
+
+async function makeWinner () {
+  document.getElementById("txHashWinner").innerHTML = '';
+  let winnerAddress = document.getElementById("bountyWinnerInput").value;
+  let cid = document.getElementById(winnerAddress.toString()).innerHTML;
+  let id = document.getElementById("bountyId").innerHTML;
+  console.log('winnerAddress:', winnerAddress, ' and cid:', cid);
+  await getStorageInfo(winnerAddress, id, cid);
+}
+
 async function getNumberOfBounties () {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
@@ -401,6 +436,7 @@ async function getNumberOfBounties () {
         let winner = bounty.winner;
         let status = bounty.status;
         let paid = bounty.paid;
+        console.log('bounty:', bounty)
         let trClass;
         if (bounty.winner == "0x0000000000000000000000000000000000000000") {
             winner = "NIL"
@@ -411,16 +447,16 @@ async function getNumberOfBounties () {
             trClass = "table-success";
         } else {
             status = "DONE"
-            // trClass = "table-info";
+            trClass = "table-info";
         }
         if (paid == true) {
             paid = "Yes"
         } else {
-            paid = "No"
+            paid = "Not Yet"
         }
 
         document.getElementById('tableBody').innerHTML += 
-        '<tr class="' + trClass + '"><th scope="row">' + i + '</th>' +
+        '<tr class="' + trClass + '" onclick="rowClicked(' + i + ')" data-toggle="modal" data-target="#exampleModalCenter"><th scope="row">' + i + '</th>' +
             '<td>' + bounty.title + '</td>' +
             '<td>' + bounty.description + '</td>' +
             '<td>' + bounty.amount / 1e18 + '</td>' +
@@ -434,9 +470,9 @@ async function getNumberOfBounties () {
     }
 }
 
-function getStorageInfo() {
-    document.getElementById("storageInfo").innerHTML = "";
-    let cid = document.getElementById("cidInput2").value;
+async function getStorageInfo(winnerAddress, id, cid) {
+    // document.getElementById("storageInfo").innerHTML = "";
+    // let cid = document.getElementById("cidInput2").value;
     console.log('cid2:', cid);
     
     // const socket = new io("http://13.126.82.18:3002"); // hosted
@@ -451,14 +487,37 @@ function getStorageInfo() {
         socket.emit("cid", cid);
     });
 
-    socket.on("storageInfo", (storageInfo) => {
+    socket.on("storageInfo", async (storageInfo) => {
         console.log('storageInfo for cid:', storageInfo);
         if (storageInfo.storageInfo) {
-            document.getElementById("storageInfo").innerHTML = storageInfo.storageInfo;
+            // document.getElementById("storageInfo").innerHTML = storageInfo.storageInfo;
+            document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
         } else {
-            document.getElementById("storageInfo").innerHTML = storageInfo.toString();
+            console.log('type of storageInfo:', typeof storageInfo);
+            let parsedInfo = jQuery.parseJSON(storageInfo);
+            console.log('parsedInfo:', parsedInfo)
+            if (!parsedInfo.cidInfo.currentStorageInfo) {
+              document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
+              return;
+            }
+            dealId = await parsedInfo.cidInfo.currentStorageInfo.cold.filecoin.proposalsList[0].dealId;
+            if (dealId > 0) {
+              const provider = new ethers.providers.Web3Provider(window.ethereum)
+              const signer = provider.getSigner()
+              let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+              let contractWithSigner = contract.connect(signer);
+              console.log('dealId:', dealId.toString());
+              dealId = dealId.toString();
+              console.log('type of dealID:', dealId, ' is ', typeof dealId);
+              contractWithSigner.makeWinner(winnerAddress, id, cid, dealId).then(async(res) => {
+                document.getElementById("txHashWinner").innerHTML = '<b>Transaction Hash:</b> ' + res.hash;
+                console.log(res.hash);
+              })
+            } else {
+              document.getElementById("txHashWinner").innerHTML = '<b>No Storage Deal in Filecoin</b>: Can\'t make Winner.'
+            }
         }
-        socket.disconnect() 
+        socket.disconnect(); 
     });
 }
 
