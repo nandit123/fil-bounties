@@ -191,7 +191,7 @@ let contractAbi = ([
 	{
 		"inputs": [
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "winner",
 				"type": "address"
 			},
@@ -358,7 +358,7 @@ function callContract() {
     let title = document.getElementById("titleInput").value;
     let description = document.getElementById("descriptionInput").value;
     let amount = document.getElementById("amountInput").value;
-    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+    let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     let overrides = {
         value: ethers.utils.parseEther(amount)     // ether in this case MUST be a string
@@ -377,7 +377,7 @@ function submitBounty() {
     const signer = provider.getSigner()
     let id = document.getElementById("bountyInput").value;
     let cid = document.getElementById("cidInput").value;
-    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+    let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     // change below
     contractWithSigner.addEntry(id, cid).then(async(res) => {
@@ -391,7 +391,7 @@ async function rowClicked(id) {
   console.log('row clicked:', id);
   const provider = new ethers.providers.Web3Provider(window.ethereum)
   const signer = provider.getSigner()
-  let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+  let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
   let contractWithSigner = contract.connect(signer);
   let bounty = await contractWithSigner.bounties(id);
   let n = parseInt(bounty.totalEntries);
@@ -424,7 +424,7 @@ async function makeWinner () {
 async function getNumberOfBounties () {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+    let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
     let n = await contractWithSigner.id();
     // document.getElementById('TotalBounties').innerHTML = '<b>Total Bounties: </b>' + n;
@@ -504,7 +504,7 @@ async function getStorageInfo(winnerAddress, id, cid) {
             if (dealId > 0) {
               const provider = new ethers.providers.Web3Provider(window.ethereum)
               const signer = provider.getSigner()
-              let contract = new ethers.Contract("0xCeD926104217d2e4f5B050BA5242e742c36d16e8", contractAbi, provider);
+              let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
               let contractWithSigner = contract.connect(signer);
               console.log('dealId:', dealId.toString());
               dealId = dealId.toString();
