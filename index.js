@@ -1,5 +1,8 @@
 window.addEventListener("load", Ready); 
 
+const POKT_APPLICATION_ID = process.env.POKT_APPLICATION_ID;
+const POKT_APPLICATION_SECRET_KEY = process.env.POKT_APPLICATION_SECRET_KEY;
+
 function openPage(pageName,elmnt) {
   var i, tabcontent, tablinks;
   tabcontent = document.getElementsByClassName("tabcontent");
@@ -333,9 +336,14 @@ async function load() {
 
 function callContract() {
     document.getElementById("tHash").innerHTML = "";
-    // window.web3 = new Web3("https://rinkeby.infura.io/v3/3d635004c08743daae3a5cb579559dbd");
     console.log("eth address:", ethaddress);
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const network = "homestead";
+    const provider = ethers.getDefaultProvider(network, {
+      pocket: {
+        applicationId: POKT_APPLICATION_ID,
+        applicationSecretKey: POKT_APPLICATION_SECRET_KEY
+      }
+    });
     const signer = provider.getSigner()
     let title = document.getElementById("titleInput").value;
     let description = document.getElementById("descriptionInput").value;
@@ -352,9 +360,14 @@ function callContract() {
 
 function submitBounty() {
     document.getElementById("tHash2").innerHTML = "";
-    // window.web3 = new Web3("https://rinkeby.infura.io/v3/3d635004c08743daae3a5cb579559dbd");
     console.log("eth address:", ethaddress);
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const network = "homestead";
+    const provider = ethers.getDefaultProvider(network, {
+      pocket: {
+        applicationId: POKT_APPLICATION_ID,
+        applicationSecretKey: POKT_APPLICATION_SECRET_KEY
+      }
+    });
     const signer = provider.getSigner()
     let id = document.getElementById("bountyInput").value;
     let cid = document.getElementById("cidInput").value;
@@ -368,7 +381,13 @@ function submitBounty() {
 
 async function rowClicked(id) {
   document.getElementById("txHashWinner").innerHTML = '';
-  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const network = "homestead";
+    const provider = ethers.getDefaultProvider(network, {
+      pocket: {
+        applicationId: POKT_APPLICATION_ID,
+        applicationSecretKey: POKT_APPLICATION_SECRET_KEY
+      }
+  });
   const signer = provider.getSigner()
   let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
   let contractWithSigner = contract.connect(signer);
@@ -396,7 +415,13 @@ async function makeWinner () {
 }
 
 async function getNumberOfBounties () {
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const network = "homestead";
+    const provider = ethers.getDefaultProvider(network, {
+      pocket: {
+        applicationId: POKT_APPLICATION_ID,
+        applicationSecretKey: POKT_APPLICATION_SECRET_KEY
+      }
+    });
     const signer = provider.getSigner()
     let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
     let contractWithSigner = contract.connect(signer);
@@ -465,7 +490,13 @@ async function getStorageInfo(winnerAddress, id, cid) {
             }
             dealId = await parsedInfo.cidInfo.currentStorageInfo.cold.filecoin.proposalsList[0].dealId;
             if (dealId > 0) {
-              const provider = new ethers.providers.Web3Provider(window.ethereum)
+              const network = "homestead";
+              const provider = ethers.getDefaultProvider(network, {
+                pocket: {
+                  applicationId: POKT_APPLICATION_ID,
+                  applicationSecretKey: POKT_APPLICATION_SECRET_KEY
+                }
+              });
               const signer = provider.getSigner()
               let contract = new ethers.Contract("0xD71E308DF6723eC70a4CeA8eC252AD2De1f359c6", contractAbi, provider);
               let contractWithSigner = contract.connect(signer);
