@@ -1,5 +1,5 @@
 # FIL Bounty
-A decentralized app to create bounties in exchange for files. Complete Bounties and Earn !
+A decentralized app to create bounties in exchange for files. Complete Bounties and Earn ! Escrow files in a trustless way using Pokt Network, IPFS, Ethereum, Filecoin
 
 ![alt text](https://github.com/nandit123/fil-bounties/blob/master/FIL_Bounties.png?raw=true)
 
